@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Shopping List</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5e5d3;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #8b4513;
+        }
+        h1 {
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        h1 span, h2 span {
+            margin-right: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #d2b48c;
+            background-color: #fff;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+        li.planned {
+            background-color: #e6d5c3;
+        }
+        li.checked {
+            background: linear-gradient(to right, #a0522d, #8b4513);
+            color: white;
+        }
+        input[type="text"], input[type="number"], textarea {
+            padding: 5px;
+            border: 1px solid #d2b48c;
+            border-radius: 3px;
+            transition: border-color 0.3s ease;
+        }
+        input[type="text"]:focus, input[type="number"]:focus, textarea:focus {
+            outline: none;
+            border-color: #d2691e;
+            box-shadow: 0 0 5px rgba(210, 105, 30, 0.5);
+        }
+        input[type="text"], textarea {
+            width: calc(100% - 50px);
+            margin-right: 10px;
+        }
+        input[type="number"] {
+            width: 60px;
+            margin-left: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #d2691e;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #b35a1f;
+        }
+        .delete {
+            color: #8b4513;
+            cursor: pointer;
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+        li.checked .delete {
+            color: white;
+        }
+        .item-content {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .checkbox {
+            margin-right: 10px;
+            cursor: pointer;
+            font-size: 1.2em;
+            user-select: none;
+            width: 30px;
+            text-align: center;
+        }
+        .checkbox.round {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #8b4513;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            color: #8b4513;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+        li.checked .checkbox.round {
+            background-color: #8b4513;
+            color: white;
+        }
+        .total {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: right;
+            color: #8b4513;
+            font-size: 1.2em;
+        }
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 20px;
+        }
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5) rotate(15deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .celebration {
+            display: inline-block;
+            animation: celebrate 0.5s ease-in-out infinite;
+            margin-left: 10px;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+        .bounce {
+            display: inline-block;
+            animation: bounce 0.5s ease-in-out;
+        }
+        .notes-section {
+            margin-top: 30px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .note {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8efe0;
+            border-radius: 5px;
+        }
+        .note-text {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        .notes-list {
+            margin-bottom: 20px;
+        }
+        .add-item-container, .add-note-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .bulk-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .bulk-action {
+            cursor: pointer;
+            padding: 5px 10px;
+            background-color: #d2691e;
+            color: white;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        .notes-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .delete-all-notes {
+            background-color: #d2691e;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .delete-all-notes:hover {
+            background-color: #b35a1f;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const ChecklistItem = ({ item, onTogglePlanned, onToggleDone, onDelete, onPriceChange }) => (
+            <li className={`${item.planned ? 'planned' : ''} ${item.done ? 'checked' : ''}`}>
+                <span 
+                    className="checkbox" 
+                    onClick={onTogglePlanned}
+                >
+                    {item.planned ? '📋' : '☐'}
+                </span>
+                <div className="item-content">
+                    <span>{item.name}</span>
+                </div>
+                <span 
+                    className="checkbox round" 
+                    onClick={onToggleDone}
+                >
+                    {item.done ? <span className="bounce">🪙</span> : ''}
+                </span>
+                <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={item.price || ''}
+                    onChange={(e) => onPriceChange(parseFloat(e.target.value) || 0)}
+                    placeholder="Price"
+                />
+                <span className="delete" onClick={onDelete}>&times;</span>
+            </li>
+        );
+
+        const NotesSection = () => {
+            const [notes, setNotes] = React.useState([]);
+            const [newNote, setNewNote] = React.useState('');
+
+            const addNote = () => {
+                if (newNote.trim()) {
+                    setNotes([newNote.trim(), ...notes]);
+                    setNewNote('');
+                }
+            };
+
+            const deleteNote = (index) => {
+                setNotes(notes.filter((_, i) => i !== index));
+            };
+
+            const deleteAllNotes = () => {
+                setNotes([]);
+            };
+
+            return (
+                <div className="notes-section">
+                    <div className="notes-header">
+                        <h2><span>📝</span>Notes</h2>
+                        {notes.length > 0 && (
+                            <button className="delete-all-notes" onClick={deleteAllNotes}>
+                                Delete All Notes
+                            </button>
+                        )}
+                    </div>
+                    <div className="notes-list">
+                        {notes.map((note, index) => (
+                            <div key={index} className="note">
+                                <span className="note-text">{note}</span>
+                                <span className="delete" onClick={() => deleteNote(index)}>&times;</span>
+                            </div>
+                        ))}
+                    </div>
+                    <div className="add-note-container">
+                        <textarea
+                            value={newNote}
+                            onChange={(e) => setNewNote(e.target.value)}
+                            placeholder="Add a new note"
+                            rows="3"
+                        />
+                        <button onClick={addNote}>+</button>
+                    </div>
+                </div>
+            );
+        };
+
+        const Checklist = () => {
+            const [items, setItems] = React.useState([
+                { name: 'Milk', planned: false, done: false, price: null },
+                { name: 'Bread', planned: false, done: false, price: null },
+                { name: 'Eggs', planned: false, done: false, price: null }
+            ]);
+            const [newItem, setNewItem] = React.useState('');
+            const [completionEmoji, setCompletionEmoji] = React.useState('');
+
+            const addItem = () => {
+                if (newItem.trim()) {
+                    const newItemObj = {
+                        name: newItem.trim(),
+                        planned: false,
+                        done: false,
+                        price: null
+                    };
+                    setItems([...items, newItemObj]);
+                    setNewItem('');
+                }
+            };
+
+            const deleteItem = (index) => {
+                setItems(items.filter((_, i) => i !== index));
+            };
+
+            const togglePlanned = (index) => {
+                const newItems = [...items];
+                newItems[index].planned = !newItems[index].planned;
+                if (newItems[index].done) {
+                    newItems[index].done = false;
+                }
+                setItems(newItems);
+            };
+
+            const toggleDone = (index) => {
+                const newItems = [...items];
+                newItems[index].done = !newItems[index].done;
+                if (newItems[index].done) {
+                    newItems[index].planned = true;
+                }
+                setItems(newItems);
+                updateCompletionEmoji(newItems);
+            };
+
+            const changePrice = (index, price) => {
+                const newItems = [...items];
+                newItems[index].price = price;
+                setItems(newItems);
+            };
+
+            const calculateTotal = () => {
+                return items
+                    .filter(item => item.done)
+                    .reduce((total, item) => total + (item.price || 0), 0)
+                    .toFixed(2);
+            };
+
+            const updateCompletionEmoji = (itemList) => {
+                const doneItems = itemList.filter(item => item.done);
+                if (doneItems.length === itemList.length && itemList.length > 0) {
+                    setCompletionEmoji('💰');
+                } else if (doneItems.length > 0) {
+                    setCompletionEmoji('🪙');
+                } else {
+                    setCompletionEmoji('');
+                }
+            };
+
+            const toggleAllPlanned = () => {
+                const allPlanned = items.every(item => item.planned);
+                setItems(items.map(item => ({ ...item, planned: !allPlanned, done: false })));
+            };
+
+            const toggleAllDone = () => {
+                const allDone = items.every(item => item.done);
+                const newItems = items.map(item => ({ ...item, done: !allDone, planned: !allDone }));
+                setItems(newItems);
+                updateCompletionEmoji(newItems);
+            };
+
+            React.useEffect(() => {
+                updateCompletionEmoji(items);
+            }, [items]);
+
+            return (
+                <div>
+                    <h1><span>🛒</span>My Shopping List</h1>
+                    <div className="bulk-actions">
+                        <span className="bulk-action" onClick={toggleAllPlanned}>
+                            {items.every(item => item.planned) ? 'Unplan All' : 'Plan All'}
+                        </span>
+                        <span className="bulk-action" onClick={toggleAllDone}>
+                            {items.every(item => item.done) ? 'Uncheck All' : 'Check All'}
+                        </span>
+                    </div>
+                    <ul>
+                        {items.map((item, index) => (
+                            <ChecklistItem 
+                                key={index} 
+                                item={item} 
+                                onTogglePlanned={() => togglePlanned(index)}
+                                onToggleDone={() => toggleDone(index)}
+                                onDelete={() => deleteItem(index)}
+                                onPriceChange={(price) => changePrice(index, price)}
+                            />
+                        ))}
+                    </ul>
+                    <div className="add-item-container">
+                        <input
+                            type="text"
+                            value={newItem}
+                            onChange={(e) => setNewItem(e.target.value)}
+                            placeholder="Add new item"
+                        />
+                        <button onClick={addItem}>+</button>
+                    </div>
+                    <div className="actions">
+                        <div className="total">
+                            {calculateTotal()}
+                            {completionEmoji && <span className="celebration">{completionEmoji}</span>}
+                        </div>
+                    </div>
+                    <NotesSection />
+                </div>
+            );
+        };
+
+        ReactDOM.render(
+            <React.StrictMode>
+                <Checklist />
+            </React.StrictMode>,
+            document.getElementById('root')
+        );
+    </script>
